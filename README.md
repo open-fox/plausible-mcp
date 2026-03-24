@@ -20,7 +20,21 @@ All tools are **read-only** and annotated with `readOnlyHint: true`.
 
 ## Quick Start
 
+### Remote (Hosted)
+
+A hosted instance is available at **`https://plausible-mcp.serg.tech`**. Each user provides their own Plausible API key as a Bearer token — no setup required.
+
+Add to Claude Code:
+
+```bash
+claude mcp add plausible --transport http https://plausible-mcp.serg.tech
+```
+
+When prompted for authentication, use your Plausible API key as the Bearer token.
+
 ### Local (STDIO)
+
+If you prefer to run it locally:
 
 ```bash
 git clone https://github.com/sergical/plausible-mcp.git
@@ -50,15 +64,18 @@ Or Claude Desktop (`claude_desktop_config.json`):
 }
 ```
 
-### Remote (Cloudflare Workers)
+### Self-Hosting (Cloudflare Workers)
 
-The server is deployable to Cloudflare Workers. Each user provides their own Plausible API key as a Bearer token — no shared secrets on the server.
+Deploy your own instance:
 
 ```bash
+git clone https://github.com/sergical/plausible-mcp.git
+cd plausible-mcp
+bun install
 npx wrangler deploy
 ```
 
-Connect in Claude via **Settings > Connectors** using the worker URL.
+The worker is multi-tenant — each user passes their own Plausible API key via the `Authorization: Bearer` header. No shared secrets needed on the server.
 
 ## Configuration
 
