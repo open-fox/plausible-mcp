@@ -1,8 +1,10 @@
 import * as Sentry from "@sentry/cloudflare";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { PlausibleClient, PlausibleResponse } from "../plausible.js";
+import { PlausibleApiError, type PlausibleClient, type PlausibleResponse } from "../plausible.js";
+import { UserFacingError } from "../errors.js";
 import {
   siteIdSchema,
+  dateRangeSchema,
   pageSchema,
   goalSchema,
   metricsSchema,
@@ -10,7 +12,6 @@ import {
   buildPageFilter,
   buildGoalFilter,
 } from "../schemas.js";
-import { z } from "zod";
 import { resolveSiteId } from "./get-timeseries.js";
 
 interface PeriodComparison {
@@ -69,16 +70,12 @@ export function register(
       annotations: { readOnlyHint: true },
       inputSchema: {
         site_id: siteIdSchema,
-        period_a: z
-          .string()
-          .describe(
-            'First date range, e.g. "2024-01-01,2024-01-07" or "7d"'
-          ),
-        period_b: z
-          .string()
-          .describe(
-            'Second date range, e.g. "2024-01-08,2024-01-14" or "7d"'
-          ),
+        period_a: dateRangeSchema.describe(
+          'First date range, e.g. "2024-01-01,2024-01-07" or "7d"'
+        ),
+        period_b: dateRangeSchema.describe(
+          'Second date range, e.g. "2024-01-08,2024-01-14" or "7d"'
+        ),
         page: pageSchema,
         metrics: metricsSchema,
         goal: goalSchema,
@@ -137,8 +134,13 @@ export function register(
           } catch (error) {
             span.setAttribute("mcp.tool.result.is_error", true);
             Sentry.captureException(error);
+            const message = error instanceof PlausibleApiError
+              ? `Plausible API returned ${error.status}`
+              : error instanceof UserFacingError
+                ? error.message
+                : "An unexpected error occurred";
             return {
-              content: [{ type: "text" as const, text: `Error: ${error instanceof Error ? error.message : String(error)}` }],
+              content: [{ type: "text" as const, text: `Error: ${message}` }],
               isError: true,
             };
           }
