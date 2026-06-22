@@ -7,7 +7,7 @@ compatibility_flags = ["nodejs_compat_v2"]
 # or in the Cloudflare dashboard under Settings > Variables
 
 routes = [
-  { pattern = "plausible-mcp.sentry.dev", custom_domain = true }
+  { pattern = "plausible-mcp.mksaas.com", custom_domain = true }
 ]
 
 [[unsafe.bindings]]
@@ -15,3 +15,7 @@ name = "RATE_LIMITER"
 type = "ratelimit"
 namespace_id = "1001"
 simple = { limit = 60, period = 60 }
+
+[vars]
+PLAUSIBLE_BASE_URL = "https://pa.indieapp.site"
+PLAUSIBLE_DEFAULT_SITE_ID = "mkimage.ai"
